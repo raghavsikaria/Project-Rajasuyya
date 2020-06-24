@@ -88,3 +88,32 @@ class InitiatePredictiveModelling:
         """Saves the given model, its relevant plots, prepares markdown if desired."""
 
         self.model_utils.save_model(model, generate_markdown)
+
+if __name__ == "__main__":
+    # Have created this file for your convenience & ease of understanding as to
+    # how various utilities interact with each other
+    # Do check out individual utilities in utils/ 
+
+    # Initialize and create the object
+    pipe_obj = InitiatePredictiveModelling('simple_cnn')
+
+    # Getting our data split, standardizing & normalizing it
+    training_data, validation_data, testing_data = pipe_obj.process_and_normalize_data_feed_for_model()
+
+    # Splitting of data for independent & dependent features
+    train_x, train_y, val_x, val_y, test_x, test_y = pipe_obj.get_dependent_and_independent_features(training_data, validation_data, testing_data)
+
+    # Initialise the model interface - our underlying prediction model
+    pipe_obj.initialise_model_interface()
+
+    # Conduct HPO process
+    pipe_obj.optimise_hyperparameters_and_save(train_x, train_y, val_x, val_y, model_epochs=10, n_calls=11)
+
+    # Training our chosen model
+    model = pipe_obj.generate_and_train_model(train_x, train_y, val_x, val_y, use_optimised_hyperparameters=True, epochs=1000)
+
+    # Saving our model
+    pipe_obj.save_model(model)
+
+    # Generating prediction output & measures
+    prediction_plot, validation_data_prediction, testing_data_prediction = pipe_obj.get_predictions_from_model(model, val_x, val_y, test_x, test_y)
